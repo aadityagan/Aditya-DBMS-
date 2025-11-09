@@ -1,0 +1,83 @@
+CREATE TABLE Author (
+  Author_ID INT PRIMARY KEY,
+  Author_Name VARCHAR(100),
+  Email VARCHAR(100)
+);
+
+CREATE TABLE Book (
+  Book_ID INT PRIMARY KEY,
+  Title VARCHAR(100),
+  Author_ID INT,
+  Price DECIMAL(8,2),
+  Stock_Quantity INT,
+  Category VARCHAR(50),
+  FOREIGN KEY (Author_ID) REFERENCES Author(Author_ID)
+);
+
+CREATE TABLE Customer (
+  Customer_ID INT PRIMARY KEY,
+  Customer_Name VARCHAR(100),
+  Email VARCHAR(100),
+  Phone VARCHAR(15),
+  Address VARCHAR(255)
+);
+
+CREATE TABLE Order_Table (
+  Order_ID INT PRIMARY KEY,
+  Customer_ID INT,
+  Order_Date DATE,
+  Total_Amount DECIMAL(10,2),
+  FOREIGN KEY (Customer_ID) REFERENCES Customer(Customer_ID)
+);
+
+CREATE TABLE Order_Details (
+  Order_ID INT,
+  Book_ID INT,
+  Quantity INT,
+  Subtotal DECIMAL(8,2),
+  PRIMARY KEY (Order_ID, Book_ID),
+  FOREIGN KEY (Order_ID) REFERENCES Order_Table(Order_ID),
+  FOREIGN KEY (Book_ID) REFERENCES Book(Book_ID)
+);
+
+CREATE TABLE Payment (
+  Payment_ID INT PRIMARY KEY,
+  Order_ID INT UNIQUE,
+  Payment_Date DATE,
+  Payment_Method VARCHAR(50),
+  Amount DECIMAL(10,2),
+  FOREIGN KEY (Order_ID) REFERENCES Order_Table(Order_ID)
+);
+
+INSERT INTO Author VALUES (1, 'J.K. Rowling', 'jk@books.com');
+INSERT INTO Author VALUES (2, 'George Orwell', 'go@books.com');
+INSERT INTO Author VALUES (3, 'Chetan Bhagat', 'cb@books.com');
+
+INSERT INTO Book VALUES (101, 'Harry Potter', 1, 499.00, 50, 'Fantasy');
+INSERT INTO Book VALUES (102, '1984', 2, 399.00, 40, 'Dystopian');
+INSERT INTO Book VALUES (103, '3 Mistakes of My Life', 3, 299.00, 60, 'Fiction');
+
+INSERT INTO Customer VALUES (1, 'Aditya Alone', 'aditya@email.com', '9876543210', 'Pune');
+INSERT INTO Customer VALUES (2, 'Riya Patil', 'riya@email.com', '9876501234', 'Mumbai');
+INSERT INTO Customer VALUES (3, 'Aarav Shah', 'aarav@email.com', '9823012345', 'Nashik');
+
+INSERT INTO Order_Table VALUES (1001, 1, '2025-11-09', 998.00);
+INSERT INTO Order_Table VALUES (1002, 2, '2025-11-09', 399.00);
+
+INSERT INTO Order_Details VALUES (1001, 101, 2, 998.00);
+INSERT INTO Order_Details VALUES (1002, 102, 1, 399.00);
+
+INSERT INTO Payment VALUES (5001, 1001, '2025-11-09', 'UPI', 998.00);
+INSERT INTO Payment VALUES (5002, 1002, '2025-11-09', 'Credit Card', 399.00);
+
+SELECT c.Customer_Name, o.Order_ID, o.Total_Amount
+FROM Customer c
+JOIN Order_Table o ON c.Customer_ID = o.Customer_ID;
+
+SELECT b.Title, a.Author_Name
+FROM Book b
+JOIN Author a ON b.Author_ID = a.Author_ID;
+
+SELECT o.Order_ID, p.Payment_Method, p.Amount
+FROM Order_Table o
+JOIN Payment p ON o.Order_ID = p.Order_ID;
