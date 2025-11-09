@@ -1,0 +1,91 @@
+-- ==============================================
+-- Title of Assignment: Named PL/SQL Block
+-- Stored Procedure and Stored Function
+-- ==============================================
+
+-- ====== Create Tables ======
+
+CREATE TABLE Stud_Marks (
+  Roll INT PRIMARY KEY,
+  Name VARCHAR2(50),
+  Total_Marks NUMBER(6)
+);
+
+CREATE TABLE Result (
+  Roll INT,
+  Name VARCHAR2(50),
+  Class VARCHAR2(30)
+);
+
+-- ====== Insert Sample Data ======
+
+INSERT INTO Stud_Marks VALUES (1, 'Aditya Alone', 1450);
+INSERT INTO Stud_Marks VALUES (2, 'Riya Patil', 980);
+INSERT INTO Stud_Marks VALUES (3, 'Aarav Shah', 860);
+INSERT INTO Stud_Marks VALUES (4, 'Meera Joshi', 750);
+INSERT INTO Stud_Marks VALUES (5, 'Rohan Deshmukh', 1000);
+
+COMMIT;
+
+-- ====== Create Stored Procedure for Categorization ======
+
+CREATE OR REPLACE PROCEDURE proc_Grade (
+  p_roll IN Stud_Marks.Roll%TYPE,
+  p_name IN Stud_Marks.Name%TYPE,
+  p_marks IN Stud_Marks.Total_Marks%TYPE
+) AS
+  v_class VARCHAR2(30);
+BEGIN
+  IF p_marks BETWEEN 990 AND 1500 THEN
+    v_class := 'Distinction';
+  ELSIF p_marks BETWEEN 900 AND 989 THEN
+    v_class := 'First Class';
+  ELSIF p_marks BETWEEN 825 AND 899 THEN
+    v_class := 'Higher Second Class';
+  ELSE
+    v_class := 'Pass or Fail';
+  END IF;
+
+  INSERT INTO Result (Roll, Name, Class)
+  VALUES (p_roll, p_name, v_class);
+
+  DBMS_OUTPUT.PUT_LINE('Student: ' || p_name || ' | Category: ' || v_class);
+END;
+/
+SHOW ERRORS;
+
+-- ====== Create a Stored Function to Get Grade ======
+
+CREATE OR REPLACE FUNCTION fn_Get_Grade (
+  p_marks IN NUMBER
+) RETURN VARCHAR2 AS
+  v_grade VARCHAR2(30);
+BEGIN
+  IF p_marks BETWEEN 990 AND 1500 THEN
+    v_grade := 'Distinction';
+  ELSIF p_marks BETWEEN 900 AND 989 THEN
+    v_grade := 'First Class';
+  ELSIF p_marks BETWEEN 825 AND 899 THEN
+    v_grade := 'Higher Second Class';
+  ELSE
+    v_grade := 'Pass or Fail';
+  END IF;
+  RETURN v_grade;
+END;
+/
+SHOW ERRORS;
+
+-- ====== PL/SQL Block to Call Procedure ======
+
+BEGIN
+  FOR rec IN (SELECT * FROM Stud_Marks) LOOP
+    proc_Grade(rec.Roll, rec.Name, rec.Total_Marks);
+  END LOOP;
+  DBMS_OUTPUT.PUT_LINE('All student grades have been inserted into Result table.');
+END;
+/
+COMMIT;
+
+-- ====== Check Results ======
+
+SELECT * FROM Result;
