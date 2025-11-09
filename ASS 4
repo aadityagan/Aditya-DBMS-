@@ -1,0 +1,83 @@
+-- ==============================================
+-- Title of Assignment: Unnamed PL/SQL Code Block
+-- Use of Control Structure and Exception Handling
+-- ==============================================
+
+-- ====== Create Tables ======
+
+CREATE TABLE Borrower (
+  Roll_no INT PRIMARY KEY,
+  Name VARCHAR(50),
+  Date_of_Issue DATE,
+  Name_of_Book VARCHAR(100),
+  Status CHAR(1)
+);
+
+CREATE TABLE Fine (
+  Roll_no INT,
+  Date_of_Fine DATE,
+  Amt NUMBER(10,2)
+);
+
+-- ====== Insert Sample Data ======
+
+INSERT INTO Borrower VALUES (1, 'Aditya Alone', TO_DATE('2025-10-01', 'YYYY-MM-DD'), 'DBMS Concepts', 'I');
+INSERT INTO Borrower VALUES (2, 'Riya Patil', TO_DATE('2025-09-20', 'YYYY-MM-DD'), 'Networking Basics', 'I');
+INSERT INTO Borrower VALUES (3, 'Aarav Shah', TO_DATE('2025-11-01', 'YYYY-MM-DD'), 'Operating Systems', 'I');
+
+COMMIT;
+
+-- ====== PL/SQL Block ======
+
+DECLARE
+  v_rollno Borrower.Roll_no%TYPE := &Roll_No;             -- Accept Roll Number from user
+  v_book Borrower.Name_of_Book%TYPE := '&Book_Name';      -- Accept Book Name from user
+  v_date_issue DATE;
+  v_days NUMBER;
+  v_fine NUMBER := 0;
+  fine_exception EXCEPTION;                               -- User-defined exception
+
+BEGIN
+  -- Fetch the issue date
+  SELECT Date_of_Issue INTO v_date_issue
+  FROM Borrower
+  WHERE Roll_no = v_rollno AND Name_of_Book = v_book;
+
+  -- Calculate number of days from date of issue
+  v_days := TRUNC(SYSDATE - v_date_issue);
+
+  DBMS_OUTPUT.PUT_LINE('Number of days since issue: ' || v_days);
+
+  -- Fine calculation using IF-ELSE control structure
+  IF v_days BETWEEN 15 AND 30 THEN
+    v_fine := v_days * 5;
+  ELSIF v_days > 30 THEN
+    v_fine := v_days * 50;
+  ELSE
+    v_fine := 0;
+  END IF;
+
+  -- Update status to Returned
+  UPDATE Borrower
+  SET Status = 'R'
+  WHERE Roll_no = v_rollno AND Name_of_Book = v_book;
+
+  -- If fine applicable, insert into Fine table
+  IF v_fine > 0 THEN
+    INSERT INTO Fine VALUES (v_rollno, SYSDATE, v_fine);
+    DBMS_OUTPUT.PUT_LINE('Fine of Rs. ' || v_fine || ' added to Fine table.');
+  ELSE
+    DBMS_OUTPUT.PUT_LINE('No fine applicable.');
+  END IF;
+
+  COMMIT;
+
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN
+    DBMS_OUTPUT.PUT_LINE('Error: No record found for the entered Roll No and Book Name.');
+  WHEN fine_exception THEN
+    DBMS_OUTPUT.PUT_LINE('Custom Error: Fine calculation failed.');
+  WHEN OTHERS THEN
+    DBMS_OUTPUT.PUT_LINE('An unexpected error occurred: ' || SQLERRM);
+END;
+/
