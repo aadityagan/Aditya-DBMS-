@@ -1,0 +1,99 @@
+-- ==============================================
+-- Title of Assignment: Database Trigger (All Types)
+-- Topic: Library Table - Track Updated or Deleted Records
+-- ==============================================
+
+-- ====== Create Main Table ======
+
+CREATE TABLE Library (
+  Book_ID INT PRIMARY KEY,
+  Book_Name VARCHAR2(100),
+  Author VARCHAR2(100),
+  Price NUMBER(8,2),
+  Status VARCHAR2(20)
+);
+
+-- ====== Create Audit Table ======
+
+CREATE TABLE Library_Audit (
+  Audit_ID INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  Book_ID INT,
+  Book_Name VARCHAR2(100),
+  Author VARCHAR2(100),
+  Price NUMBER(8,2),
+  Status VARCHAR2(20),
+  Operation VARCHAR2(20),
+  Changed_On DATE
+);
+
+-- ====== Insert Sample Data ======
+
+INSERT INTO Library VALUES (1, 'DBMS Concepts', 'Navathe', 550.00, 'Available');
+INSERT INTO Library VALUES (2, 'Operating Systems', 'Silberschatz', 600.00, 'Issued');
+INSERT INTO Library VALUES (3, 'Computer Networks', 'Tanenbaum', 700.00, 'Available');
+INSERT INTO Library VALUES (4, 'Data Structures', 'Lipschutz', 450.00, 'Available');
+
+COMMIT;
+
+-- ====== BEFORE UPDATE ROW LEVEL TRIGGER ======
+
+CREATE OR REPLACE TRIGGER trg_before_update_library
+BEFORE UPDATE ON Library
+FOR EACH ROW
+BEGIN
+  INSERT INTO Library_Audit (Book_ID, Book_Name, Author, Price, Status, Operation, Changed_On)
+  VALUES (:OLD.Book_ID, :OLD.Book_Name, :OLD.Author, :OLD.Price, :OLD.Status, 'BEFORE UPDATE', SYSDATE);
+END;
+/
+SHOW ERRORS;
+
+-- ====== AFTER UPDATE ROW LEVEL TRIGGER ======
+
+CREATE OR REPLACE TRIGGER trg_after_update_library
+AFTER UPDATE ON Library
+FOR EACH ROW
+BEGIN
+  INSERT INTO Library_Audit (Book_ID, Book_Name, Author, Price, Status, Operation, Changed_On)
+  VALUES (:NEW.Book_ID, :NEW.Book_Name, :NEW.Author, :NEW.Price, :NEW.Status, 'AFTER UPDATE', SYSDATE);
+END;
+/
+SHOW ERRORS;
+
+-- ====== BEFORE DELETE ROW LEVEL TRIGGER ======
+
+CREATE OR REPLACE TRIGGER trg_before_delete_library
+BEFORE DELETE ON Library
+FOR EACH ROW
+BEGIN
+  INSERT INTO Library_Audit (Book_ID, Book_Name, Author, Price, Status, Operation, Changed_On)
+  VALUES (:OLD.Book_ID, :OLD.Book_Name, :OLD.Author, :OLD.Price, :OLD.Status, 'BEFORE DELETE', SYSDATE);
+END;
+/
+SHOW ERRORS;
+
+-- ====== AFTER DELETE STATEMENT LEVEL TRIGGER ======
+
+CREATE OR REPLACE TRIGGER trg_after_delete_library
+AFTER DELETE ON Library
+BEGIN
+  INSERT INTO Library_Audit (Book_ID, Book_Name, Author, Price, Status, Operation, Changed_On)
+  VALUES (NULL, NULL, NULL, NULL, NULL, 'AFTER DELETE STATEMENT', SYSDATE);
+END;
+/
+SHOW ERRORS;
+
+-- ====== TEST THE TRIGGERS ======
+
+-- Update a record
+UPDATE Library
+SET Price = 650.00, Status = 'Issued'
+WHERE Book_ID = 1;
+
+-- Delete a record
+DELETE FROM Library WHERE Book_ID = 4;
+
+COMMIT;
+
+-- ====== View Results ======
+SELECT * FROM Library;
+SELECT * FROM Library_Audit;
