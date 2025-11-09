@@ -1,0 +1,81 @@
+-- ==============================================
+-- Title of Assignment: Cursors (All Types)
+-- Topic: Parameterized Cursor - Merge Data Between Tables
+-- ==============================================
+
+-- ====== Create Old Roll Call Table ======
+
+CREATE TABLE O_RollCall (
+  Roll_No INT PRIMARY KEY,
+  Name VARCHAR2(50),
+  Dept VARCHAR2(50)
+);
+
+-- ====== Create New Roll Call Table ======
+
+CREATE TABLE N_RollCall (
+  Roll_No INT,
+  Name VARCHAR2(50),
+  Dept VARCHAR2(50)
+);
+
+-- ====== Insert Sample Data ======
+
+-- Old Roll Call (Existing Students)
+INSERT INTO O_RollCall VALUES (1, 'Aditya Alone', 'Computer Science');
+INSERT INTO O_RollCall VALUES (2, 'Riya Patil', 'Information Technology');
+INSERT INTO O_RollCall VALUES (3, 'Aarav Shah', 'Electronics');
+
+-- New Roll Call (New + Duplicate Students)
+INSERT INTO N_RollCall VALUES (2, 'Riya Patil', 'Information Technology');
+INSERT INTO N_RollCall VALUES (3, 'Aarav Shah', 'Electronics');
+INSERT INTO N_RollCall VALUES (4, 'Meera Joshi', 'Computer Science');
+INSERT INTO N_RollCall VALUES (5, 'Rohan Deshmukh', 'Information Technology');
+
+COMMIT;
+
+-- ====== PL/SQL Block Using Parameterized Cursor ======
+
+DECLARE
+  -- Parameterized Cursor: Takes Roll_No as parameter
+  CURSOR c_new(p_roll N_RollCall.Roll_No%TYPE) IS
+    SELECT Roll_No, Name, Dept
+    FROM N_RollCall
+    WHERE Roll_No = p_roll;
+
+  v_roll N_RollCall.Roll_No%TYPE;
+  v_name N_RollCall.Name%TYPE;
+  v_dept N_RollCall.Dept%TYPE;
+  v_exists NUMBER := 0;
+
+BEGIN
+  -- Loop through each record in N_RollCall
+  FOR rec IN (SELECT * FROM N_RollCall) LOOP
+
+    -- Check if Roll_No already exists in O_RollCall
+    SELECT COUNT(*) INTO v_exists
+    FROM O_RollCall
+    WHERE Roll_No = rec.Roll_No;
+
+    IF v_exists = 0 THEN
+      -- If not found, use parameterized cursor to fetch details
+      OPEN c_new(rec.Roll_No);
+      FETCH c_new INTO v_roll, v_name, v_dept;
+      CLOSE c_new;
+
+      -- Insert new record into O_RollCall
+      INSERT INTO O_RollCall VALUES (v_roll, v_name, v_dept);
+
+      DBMS_OUTPUT.PUT_LINE('Inserted: ' || v_name || ' (' || v_roll || ')');
+    ELSE
+      DBMS_OUTPUT.PUT_LINE('Skipped (Already Exists): ' || rec.Name || ' (' || rec.Roll_No || ')');
+    END IF;
+  END LOOP;
+
+  COMMIT;
+  DBMS_OUTPUT.PUT_LINE('Merge operation completed successfully.');
+END;
+/
+
+-- ====== Check Final Data in O_RollCall ======
+SELECT * FROM O_RollCall;
