@@ -1,0 +1,95 @@
+-- ==============================================
+-- Title of Assignment: SQL Queries
+-- ==============================================
+
+-- ====== a. DDL Statements ======
+
+-- 1. Create Table: STUDENT
+CREATE TABLE Student (
+  Student_ID INT PRIMARY KEY,
+  Name VARCHAR(100) NOT NULL,
+  Age INT,
+  Course VARCHAR(50),
+  Email VARCHAR(100) UNIQUE,
+  Marks INT CHECK (Marks >= 0 AND Marks <= 100)
+);
+
+-- 2. Create Table: COURSE
+CREATE TABLE Course (
+  Course_ID INT PRIMARY KEY,
+  Course_Name VARCHAR(100),
+  Duration VARCHAR(50)
+);
+
+-- 3. Create a FOREIGN KEY relationship
+ALTER TABLE Student
+ADD Course_ID INT,
+ADD CONSTRAINT fk_course FOREIGN KEY (Course_ID) REFERENCES Course(Course_ID);
+
+-- 4. Create a View
+CREATE VIEW Student_View AS
+SELECT Name, Course, Marks FROM Student WHERE Marks > 60;
+
+-- 5. Create an Index
+CREATE INDEX idx_student_name ON Student(Name);
+
+-- 6. Create a Sequence (for auto increment in Oracle / PostgreSQL)
+CREATE SEQUENCE student_seq START WITH 1 INCREMENT BY 1;
+
+-- 7. Create a Synonym (for Oracle)
+CREATE SYNONYM stu FOR Student;
+
+-- ====== b. DML Statements ======
+
+-- 1. Insert data into Course
+INSERT INTO Course VALUES (1, 'Computer Science', '3 Years');
+INSERT INTO Course VALUES (2, 'Information Technology', '3 Years');
+INSERT INTO Course VALUES (3, 'Electronics', '4 Years');
+
+-- 2. Insert data into Student
+INSERT INTO Student VALUES (1, 'Aditya Alone', 20, 'Computer Science', 'aditya@email.com', 85, 1);
+INSERT INTO Student VALUES (2, 'Riya Patil', 21, 'Information Technology', 'riya@email.com', 78, 2);
+INSERT INTO Student VALUES (3, 'Aarav Shah', 22, 'Electronics', 'aarav@email.com', 65, 3);
+INSERT INTO Student VALUES (4, 'Meera Joshi', 20, 'Computer Science', 'meera@email.com', 92, 1);
+INSERT INTO Student VALUES (5, 'Rohan Deshmukh', 21, 'Information Technology', 'rohan@email.com', 58, 2);
+
+-- 3. SELECT Query: Display all students
+SELECT * FROM Student;
+
+-- 4. SELECT Query: Display students with marks greater than 70
+SELECT Name, Marks FROM Student WHERE Marks > 70;
+
+-- 5. SELECT Query with ORDER BY
+SELECT Name, Course, Marks FROM Student ORDER BY Marks DESC;
+
+-- 6. UPDATE Query: Increase marks by 5 for all students in Computer Science
+UPDATE Student SET Marks = Marks + 5 WHERE Course = 'Computer Science';
+
+-- 7. DELETE Query: Delete student with marks less than 60
+DELETE FROM Student WHERE Marks < 60;
+
+-- 8. SELECT Query using Functions
+SELECT Name, UPPER(Course) AS Course_Upper, ROUND(Marks/10, 1) AS Grade FROM Student;
+
+-- 9. SELECT Query using BETWEEN operator
+SELECT * FROM Student WHERE Marks BETWEEN 70 AND 90;
+
+-- 10. SELECT Query using IN operator
+SELECT Name, Marks FROM Student WHERE Course IN ('Computer Science', 'Information Technology');
+
+-- 11. SELECT Query using LIKE operator
+SELECT * FROM Student WHERE Name LIKE 'A%';
+
+-- 12. SELECT Query using Set Operator (UNION)
+SELECT Name FROM Student WHERE Course = 'Computer Science'
+UNION
+SELECT Name FROM Student WHERE Course = 'Information Technology';
+
+-- 13. SELECT from View
+SELECT * FROM Student_View;
+
+-- 14. DROP INDEX (optional)
+DROP INDEX idx_student_name;
+
+-- 15. DROP VIEW (optional)
+DROP VIEW Student_View;
