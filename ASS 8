@@ -1,0 +1,100 @@
+-- ==============================================
+-- Title of Assignment: Database Connectivity
+-- Topic: MySQL/Oracle Database Connectivity with Front-End Application
+-- ==============================================
+
+-- ====== Create Database (for MySQL) ======
+CREATE DATABASE CollegeDB;
+USE CollegeDB;
+
+-- ====== Create Table ======
+CREATE TABLE Student (
+  Roll_No INT PRIMARY KEY AUTO_INCREMENT,
+  Name VARCHAR(100),
+  Age INT,
+  Course VARCHAR(100),
+  City VARCHAR(100)
+);
+
+-- ====== Insert Sample Data ======
+INSERT INTO Student (Name, Age, Course, City) VALUES ('Aditya Alone', 20, 'Computer Science', 'Pune');
+INSERT INTO Student (Name, Age, Course, City) VALUES ('Riya Patil', 21, 'Information Technology', 'Mumbai');
+INSERT INTO Student (Name, Age, Course, City) VALUES ('Aarav Shah', 22, 'Electronics', 'Nashik');
+INSERT INTO Student (Name, Age, Course, City) VALUES ('Meera Joshi', 20, 'Mechanical', 'Nagpur');
+
+-- ====== Select All Records ======
+SELECT * FROM Student;
+
+-- ====== Add New Record (INSERT Operation) ======
+INSERT INTO Student (Name, Age, Course, City) VALUES ('Rohan Deshmukh', 23, 'Civil', 'Kolhapur');
+
+-- ====== Edit Record (UPDATE Operation) ======
+UPDATE Student
+SET City = 'Aurangabad', Course = 'Computer Engineering'
+WHERE Roll_No = 3;
+
+-- ====== Delete Record (DELETE Operation) ======
+DELETE FROM Student WHERE Roll_No = 4;
+
+-- ====== Display Final Data ======
+SELECT * FROM Student;
+
+-- ==============================================
+-- Example: FRONT-END CONNECTIVITY (Python with MySQL)
+-- ==============================================
+-- Note: This code is to be used in your front-end language (example in Python)
+-- It performs Add, Delete, and Edit operations through database connectivity.
+
+-- Save this as db_connect.py (for example)
+
+"""
+import mysql.connector
+
+# Connect to MySQL Database
+conn = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="your_password",
+    database="CollegeDB"
+)
+
+cursor = conn.cursor()
+
+# Display all records
+print("All Students:")
+cursor.execute("SELECT * FROM Student")
+for row in cursor.fetchall():
+    print(row)
+
+# Add Record
+add_query = "INSERT INTO Student (Name, Age, Course, City) VALUES (%s, %s, %s, %s)"
+data = ("Neha Kulkarni", 21, "Electrical", "Solapur")
+cursor.execute(add_query, data)
+conn.commit()
+print("Record Added Successfully.")
+
+# Update Record
+update_query = "UPDATE Student SET City = 'Mumbai' WHERE Name = 'Aditya Alone'"
+cursor.execute(update_query)
+conn.commit()
+print("Record Updated Successfully.")
+
+# Delete Record
+delete_query = "DELETE FROM Student WHERE Name = 'Riya Patil'"
+cursor.execute(delete_query)
+conn.commit()
+print("Record Deleted Successfully.")
+
+# Final Data
+print("\nFinal Student Table:")
+cursor.execute("SELECT * FROM Student")
+for row in cursor.fetchall():
+    print(row)
+
+# Close connection
+conn.close()
+"""
+
+-- ==============================================
+-- End of Assignment Code
+-- ==============================================
