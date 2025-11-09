@@ -1,0 +1,111 @@
+-- ==============================================
+-- Title of Assignment: SQL Queries – All Types of Join, Sub-Query and View
+-- ==============================================
+
+-- ====== Database Creation (Simple Example: Student-Course-Department) ======
+
+-- Create Department Table
+CREATE TABLE Department (
+  Dept_ID INT PRIMARY KEY,
+  Dept_Name VARCHAR(100)
+);
+
+-- Create Course Table
+CREATE TABLE Course (
+  Course_ID INT PRIMARY KEY,
+  Course_Name VARCHAR(100),
+  Dept_ID INT,
+  FOREIGN KEY (Dept_ID) REFERENCES Department(Dept_ID)
+);
+
+-- Create Student Table
+CREATE TABLE Student (
+  Student_ID INT PRIMARY KEY,
+  Student_Name VARCHAR(100),
+  Course_ID INT,
+  Marks INT,
+  Age INT,
+  FOREIGN KEY (Course_ID) REFERENCES Course(Course_ID)
+);
+
+-- Create Teacher Table
+CREATE TABLE Teacher (
+  Teacher_ID INT PRIMARY KEY,
+  Teacher_Name VARCHAR(100),
+  Dept_ID INT,
+  FOREIGN KEY (Dept_ID) REFERENCES Department(Dept_ID)
+);
+
+-- ====== Insert Data ======
+INSERT INTO Department VALUES (1, 'Computer Science');
+INSERT INTO Department VALUES (2, 'Information Technology');
+INSERT INTO Department VALUES (3, 'Electronics');
+
+INSERT INTO Course VALUES (101, 'DBMS', 1);
+INSERT INTO Course VALUES (102, 'Networking', 2);
+INSERT INTO Course VALUES (103, 'Microprocessor', 3);
+
+INSERT INTO Student VALUES (1, 'Aditya Alone', 101, 85, 20);
+INSERT INTO Student VALUES (2, 'Riya Patil', 102, 78, 21);
+INSERT INTO Student VALUES (3, 'Aarav Shah', 103, 69, 22);
+INSERT INTO Student VALUES (4, 'Meera Joshi', 101, 92, 20);
+INSERT INTO Student VALUES (5, 'Rohan Deshmukh', 102, 60, 21);
+
+INSERT INTO Teacher VALUES (201, 'Dr. Sharma', 1);
+INSERT INTO Teacher VALUES (202, 'Prof. Mehta', 2);
+INSERT INTO Teacher VALUES (203, 'Dr. Nair', 3);
+
+-- ====== 10 SQL Queries Demonstrating Joins, Subqueries, and Views ======
+
+-- 1. INNER JOIN: Display students with their course names
+SELECT s.Student_Name, c.Course_Name
+FROM Student s
+INNER JOIN Course c ON s.Course_ID = c.Course_ID;
+
+-- 2. LEFT JOIN: Display all courses and students (including courses without students)
+SELECT c.Course_Name, s.Student_Name
+FROM Course c
+LEFT JOIN Student s ON c.Course_ID = s.Course_ID;
+
+-- 3. RIGHT JOIN: Display all students and their courses (if any)
+SELECT s.Student_Name, c.Course_Name
+FROM Student s
+RIGHT JOIN Course c ON s.Course_ID = c.Course_ID;
+
+-- 4. FULL OUTER JOIN: Display all students and courses (works in some DBs)
+SELECT s.Student_Name, c.Course_Name
+FROM Student s
+FULL OUTER JOIN Course c ON s.Course_ID = c.Course_ID;
+
+-- 5. CROSS JOIN: Display all combinations of teachers and departments
+SELECT t.Teacher_Name, d.Dept_Name
+FROM Teacher t
+CROSS JOIN Department d;
+
+-- 6. SELF JOIN: Display students having same age
+SELECT s1.Student_Name AS Student1, s2.Student_Name AS Student2, s1.Age
+FROM Student s1, Student s2
+WHERE s1.Age = s2.Age AND s1.Student_ID <> s2.Student_ID;
+
+-- 7. SUBQUERY: Display students who scored above average marks
+SELECT Student_Name, Marks
+FROM Student
+WHERE Marks > (SELECT AVG(Marks) FROM Student);
+
+-- 8. SUBQUERY with IN: Display students enrolled in departments handled by “Dr. Sharma”
+SELECT Student_Name
+FROM Student
+WHERE Course_ID IN (
+  SELECT Course_ID FROM Course
+  WHERE Dept_ID = (SELECT Dept_ID FROM Teacher WHERE Teacher_Name = 'Dr. Sharma')
+);
+
+-- 9. CREATE VIEW: Students scoring more than 70 marks
+CREATE VIEW HighScorers AS
+SELECT Student_Name, Marks, Course_ID FROM Student WHERE Marks > 70;
+
+-- 10. SELECT from VIEW: Display data from created view
+SELECT * FROM HighScorers;
+
+-- ====== Optional Cleanup ======
+-- DROP VIEW HighScorers;
